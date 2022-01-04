@@ -4,10 +4,16 @@ from levelupapi.models.game import Game
 from levelupapi.models.gamer import Gamer
 
 class Event(models.Model):
-
-    title = models.CharField(max_length=100)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    gamer = models.ForeignKey(Gamer, on_delete=models.CASCADE)
-    location = models.CharField(max_length=30)
-    date = models.DateField
-    time = models.TimeField
+    organizer = models.ForeignKey(
+        Gamer,
+        on_delete=models.CASCADE,
+        related_name='organizer'
+    )
+    description = models.CharField(max_length=200)
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        related_name='events'
+    )
+    date = models.DateField()
+    time = models.TimeField()
