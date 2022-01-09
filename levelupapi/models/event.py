@@ -17,6 +17,7 @@ class Event(models.Model):
     )
     date = models.DateField()
     time = models.TimeField()
+    attendees = models.ManyToManyField(Gamer)
     
     @property
     def joined(self):
