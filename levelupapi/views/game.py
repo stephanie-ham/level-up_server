@@ -1,11 +1,10 @@
 """View module for handling requests about games"""
 from django.core.exceptions import ValidationError
-from rest_framework import status
 from django.http import HttpResponseServerError
+from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
-from rest_framework import status
 from levelupapi.models import Game, Category, Gamer
 
 
@@ -34,7 +33,7 @@ class GameView(ViewSet):
 
         # Use the Django ORM to get the record from the database
         # whose `id` is what the client passed as the
-        # `gameTypeId` in the body of the request.
+        # `categoryId` in the body of the request.
         category = Category.objects.get(pk=request.data["categoryId"])
         game.category = category
 
@@ -44,7 +43,7 @@ class GameView(ViewSet):
         try:
             game.save()
             serializer = GameSerializer(game, context={'request': request})
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         # If anything went wrong, catch the exception and
         # send a response with a 400 status code to tell the
@@ -69,6 +68,8 @@ class GameView(ViewSet):
             game = Game.objects.get(pk=pk)
             serializer = GameSerializer(game, context={'request': request})
             return Response(serializer.data)
+        except Game.DoesNotExist as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
         except Exception as ex:
             return HttpResponseServerError(ex)
 
@@ -136,7 +137,8 @@ class GameView(ViewSet):
         serializer = GameSerializer(
             games, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
+
 class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for games
 
@@ -147,3 +149,4 @@ class GameSerializer(serializers.ModelSerializer):
         model = Game
         fields = ('id', 'title', 'maker', 'number_of_players', 'skill_level', 'category')
         depth = 1
+        
